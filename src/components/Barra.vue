@@ -3,9 +3,8 @@
         <b-navbar-brand href="#">
             AsistenciaDesu
         </b-navbar-brand>
-        <b-navbar-nav>
-            <b-navbar-item> <div text-variant="white">Ver Asistencias </div></b-navbar-item>
-        </b-navbar-nav>
+            <b-navbar-item> <router-link to="/TomarLista" text-variant="white"> Tomar Lista</router-link> </b-navbar-item>
+            <b-navbar-item> <router-link to="/VerAsistencia" text-variant="white"> Ver Asistencia</router-link> </b-navbar-item>
     </b-navbar>
 </template>
 <script>

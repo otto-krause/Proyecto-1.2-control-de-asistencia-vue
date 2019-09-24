@@ -18,6 +18,7 @@
         </b-tbody>
     </b-table-simple>
 </template>
+
 <script>
 
 export default {
@@ -36,4 +37,5 @@ export default {
 
     }
 }
+
 </script>
