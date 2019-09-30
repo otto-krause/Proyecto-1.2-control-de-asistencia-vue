@@ -1,14 +1,14 @@
 <template>
   <div>
     <barra/>
-    <b-form @submit="PostAsistencia">
+    <b-form @submit.prevent="PostAsistencia">
       <h1>Seleccione un curso</h1>
       <b-dropdown right text="División">
         <b-dd-item v-for="(Curso, index) in Cursos" v-bind:key="index">
-          <b-button block variant="dark" @click="ObtenerChabones(Curso.idDivision)">{{Curso.Division}}</b-button>
+          <b-button block variant="dark" @click="ObtenerAlumnos(Curso.idDivision)">{{Curso.Division}}</b-button>
         </b-dd-item>
       </b-dropdown>
-      <b-input type="date"></b-input>
+      <b-input type="date" v-model="fecha"></b-input>
       <div class="TablaTomarLista">
         <b-table-simple responsive>
           <b-thead>
@@ -21,16 +21,16 @@
           </b-thead>
           <b-tbody>
             <tr v-for="(Alumno, index) in Alumnos" v-bind:key="index">
-              <td>{{Alumno.DNI}}</td>
+              <td>{{Asistencia[index].dniAlumno = Alumno.DNI}}</td>
               <td>{{Alumno.Nombre}}</td>
               <td>{{Alumno.Apellido}}</td>
               <td>
                 <b-form-group>
                   <b-form-radio-group
-                    id="btn-radios-1"
-                    :options="Opciones"
+                    id="'radios'+index"
+                    v-model="Asistencia[index].valor"
                     buttons
-                    name="radios-btn-default"
+                    name="'radios'+index"
                   ></b-form-radio-group>
                 </b-form-group>
               </td>
@@ -55,37 +55,9 @@ export default {
   name: "TomarLista",
   data() {
     return {
-      Asistencia: {
-        valor: "",
-        dniAlumno: ""
-      },
-      Alumnos: {},/*[
-        {
-          DNI: "434343433",
-          Nombre: "Nombre1",
-          Apellido: "Apellido1"
-        },
-        {
-          DNI: "434343434",
-          Nombre: "Nombre2",
-          Apellido: "Apellido2"
-        },
-        {
-          DNI: "434343435",
-          Nombre: "Nombre5",
-          Apellido: "Apellido5"
-        },
-        {
-          DNI: "434343436",
-          Nombre: "Nombre3",
-          Apellido: "Apellido3"
-        },
-        {
-          DNI: "434343437",
-          Nombre: "Nombre4",
-          Apellido: "Apellido4"
-        }
-      ],*/
+      fecha: "",
+      Asistencia: [],
+      Alumnos: {},
       Opciones: [
         { text: "Presente" },
         { text: "Tarde" },
@@ -93,36 +65,37 @@ export default {
         { text: "Ausente" },
         { text: "Ausente Justificado" }
       ],
-      Cursos: {}/*[
-        {
-          usuario: "User1",
-          idDivision: "1",
-          Division: "6to CP 1"
-        },
-        {
-          usuario: "User1",
-          idDivision: "2",
-          Division: "6to CP 2"
-        }
-      ]*/
+      Cursos: {}
     };
   },
   mounted() {
     this.ObtenerCursos();
   },
   methods: {
+    GenerarVacias(largo) {
+      this.Asistencia = [];
+      //console.log("Se intentó limpiar el array de Asistencia ");
+      for (var i = 0; i < largo; i++) {
+        this.Asistencia.push({
+          valor: "",
+          dniAlumno: "",
+          fecha: ""
+        });
+      }
+    },
     PostAsistencia() {
+      this.Asistencia.forEach(asistenciaActual => {
+        asistenciaActual.fecha = this.fecha;
+      });
       //console.log(JSON.stringify(this.Asistencia));
     },
-    ObtenerChabones(division) {
+    ObtenerAlumnos(division) {
       axios
         .get("http://localhost:3000/ListaAlumnos/" + division)
         .then(response => {
           this.Alumnos = response.data;
         });
-    },
-    AgregarChabones() {
-      axios.post("http://localhost:3000/Agregar/").then();
+      this.GenerarVacias(this.Alumnos.length);
     },
     ObtenerCursos() {
       axios.get("http://localhost:3000/ObtenerCursos/").then(response => {
