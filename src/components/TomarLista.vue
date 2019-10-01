@@ -1,6 +1,5 @@
 <template>
   <div>
-    <barra/>
     <b-form @submit.prevent="PostAsistencia">
       <h1>Seleccione un curso</h1>
       <b-dropdown right text="División">
@@ -21,43 +20,44 @@
           </b-thead>
           <b-tbody>
             <tr v-for="(Alumno, index) in Alumnos" v-bind:key="index">
-              <td>{{Asistencia[index].dniAlumno = Alumno.DNI}}</td>
-              <td>{{Alumno.Nombre}}</td>
-              <td>{{Alumno.Apellido}}</td>
-              <td>
-                <b-form-group>
-                  <b-form-radio-group
-                    id="'radios'+index"
-                    v-model="Asistencia[index].valor"
-                    buttons
-                    name="'radios'+index"
-                  ></b-form-radio-group>
-                </b-form-group>
-              </td>
+              <template>
+                <td>{{Asistencia[index].dniAlumno = Alumno.dniAlumno}}</td>
+                <td>{{Alumno.Nombre}}</td>
+                <td>{{Alumno.Apellido}}</td>
+                <td>
+                  <b-form-group>
+                    <b-form-radio-group
+                      id="'radios'+index"
+                      v-model="Asistencia[index].valor"
+                      buttons
+                      name="'radios'+index"
+                    ></b-form-radio-group>
+                  </b-form-group>
+                </td>
+              </template>
             </tr>
           </b-tbody>
         </b-table-simple>
       </div>
       <b-button type="submit">Enter</b-button>
     </b-form>
+    <b-button @click="MostrarAlgo(Asistencia[1].valor)"></b-button>
   </div>
 </template>
 <script type="text/javascript">
 
 import axios from 'axios';
-import Barra from './Barra.vue';
 
 export default {
   components:
   {
-    Barra
   },
   name: "TomarLista",
   data() {
     return {
       fecha: "",
       Asistencia: [],
-      Alumnos: {},
+      Alumnos: [],
       Opciones: [
         { text: "Presente" },
         { text: "Tarde" },
@@ -72,9 +72,14 @@ export default {
     this.ObtenerCursos();
   },
   methods: {
+    MostrarAlgo(algo)
+    {
+      console.log(algo);
+    },
     GenerarVacias(largo) {
       this.Asistencia = [];
-      //console.log("Se intentó limpiar el array de Asistencia ");
+      console.log("Se intentó limpiar el array de Asistencia ");
+      console.log(largo);
       for (var i = 0; i < largo; i++) {
         this.Asistencia.push({
           valor: "",
@@ -90,12 +95,18 @@ export default {
       //console.log(JSON.stringify(this.Asistencia));
     },
     ObtenerAlumnos(division) {
-      axios
-        .get("http://localhost:3000/ListaAlumnos/" + division)
+      console.log("Intentando obtener alumnos");
+      axios.get("http://localhost:3000/ListaAlumnos/" + division)
         .then(response => {
           this.Alumnos = response.data;
-        });
-      this.GenerarVacias(this.Alumnos.length);
+          this.GenerarVacias(this.Alumnos.length);
+        })
+        .catch(function (error) {
+        {
+          console.log("FRACASÉ");
+          console.log(error);
+        }
+      });
     },
     ObtenerCursos() {
       axios.get("http://localhost:3000/ObtenerCursos/").then(response => {
