@@ -2,12 +2,20 @@
   <div>
     <b-form @submit.prevent="PostAsistencia">
       <h1>Seleccione un curso</h1>
+      <b-alert v-show="exito" show variant="success">¡Se tomó lista con éxito!</b-alert>
       <b-dropdown right text="División">
         <b-dd-item v-for="(Curso, index) in Cursos" v-bind:key="index">
           <b-button block variant="dark" @click="ObtenerAlumnos(Curso.idDivision)">{{Curso.Division}}</b-button>
         </b-dd-item>
       </b-dropdown>
-      <b-input type="date" v-model="fecha"></b-input>
+      {{Semana}}
+      <b-dropdown right v-model="turno" text="Turno">
+        <b-dd-item v-for="(Turno, index) in Semana" v-bind:key="index">
+          {{MostrarAlgo(Turno)}}
+          <b-button block variant="dark">{{Turno.turno}}</b-button>
+        </b-dd-item>
+      </b-dropdown>
+      <b-input @change="ObtenerTurnos(Cursos[0].idDivision,fecha)" type="date" v-model="fecha"></b-input>
       <div class="TablaTomarLista">
         <b-table-simple responsive>
           <b-thead>
@@ -30,6 +38,7 @@
                       id="'radios'+index"
                       v-model="Asistencia[index].valor"
                       buttons
+                      :options="Opciones"
                       name="'radios'+index"
                     ></b-form-radio-group>
                   </b-form-group>
@@ -55,6 +64,10 @@ export default {
   name: "TomarLista",
   data() {
     return {
+      turno:"",
+      exito: false,
+      semanaActual:{},
+      Semana:[],
       fecha: "",
       Asistencia: [],
       Alumnos: [],
@@ -84,15 +97,32 @@ export default {
         this.Asistencia.push({
           valor: "",
           dniAlumno: "",
-          fecha: ""
+          fecha: "",
+          idSemana:""
         });
       }
     },
     PostAsistencia() {
+      this.Semana.forEach(semanaActual =>
+      {
+        if(semanaActual.valor == this.turno)
+        {
+          this.semanaActual = semanaActual;
+        }
+      })
       this.Asistencia.forEach(asistenciaActual => {
         asistenciaActual.fecha = this.fecha;
+        asistenciaActual.idSemana = this.semanaActual.idSemana;
       });
-      //console.log(JSON.stringify(this.Asistencia));
+      console.log(JSON.stringify(this.Asistencia));
+      this.exito = true;
+    },
+    ObtenerTurnos(division, diaSemana)
+    {
+      axios.get("http://localhost:3000/ObtenerSemSistencia/" + division + "/" + diaSemana)
+      .then(response =>{
+          this.Semana = response.data;
+      });
     },
     ObtenerAlumnos(division) {
       console.log("Intentando obtener alumnos");
